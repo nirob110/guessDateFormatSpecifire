@@ -175,62 +175,72 @@ foreach($content as $date){
             try{
                 //day part
                 if(preg_match($regnumberday, $val, $daymatch) && !empty($trimmedDay = (int)trim($daymatch[0])) && $trimmedDay > 0  && $trimmedDay < 32 && strlen($val) <= 2 && $key < 2){
-                   // dump(['pattern' => $pattAr, 'date' => $date , 'key' => $key, 'val' => $val, 'match'=> $daymatch, 'daypart']);
+                    $currentFormat = strlen($val) == 2 ? 'd' : 'j';
                     $format .= strlen($val) == 2 ? 'd' : 'j';
-                    echo $format;
+                    dump(['currentFormat' => $currentFormat,'format' => $format,'pattern' => $pattAr, 'date' => $date , 'key' => $key, 'val' => $val, 'match'=> $daymatch, 'daypart']);
                     continue;
                 }
                 // still I got to handle format like January 02 2018 and so on.
                 //textual month part
                 if(preg_match($regallmonth, $val, $monthmatch) && !empty($trimmedmonth = (string)trim($monthmatch[0])) && strlen($trimmedmonth) > 0){
                     if(preg_match($monthFullCapReg, $trimmedmonth, $monthFullCapRegMatching) && !empty($trimmedmonthFullCapReg = (string)trim($monthFullCapRegMatching[0])) && strlen($trimmedmonthFullCapReg) > 0){
-                       // dump(['pattern' => $pattAr, 'date' => $date , 'key' => $key, 'val' => $val, 'match'=> $trimmedmonthFullCapReg, 'textualmonthpart fullcapitalized']);
                         //need to store information that the month name should be capitalized
+                        $currentFormat = "F";
                         $format .= "F";
+                        dump(['currentFormat' => $currentFormat,'format' => $format,'pattern' => $pattAr, 'date' => $date , 'key' => $key, 'val' => $val, 'match'=> $trimmedmonthFullCapReg, 'textualmonthpart fullcapitalized']);
                         continue;
                     }
                     
                     if(preg_match($monthFullWCapReg, $trimmedmonth, $monthFullWCapRegMatching) && !empty($trimmedmonthFullWCapReg = (string)trim($monthFullWCapRegMatching[0])) && strlen($trimmedmonthFullWCapReg) > 0){
-//                        dump(['pattern' => $pattAr, 'date' => $date , 'key' => $key, 'val' => $val, 'match'=> $trimmedmonthFullWCapReg, 'textualmonthpart fullwcapitalized']);
                         //need to store information that the month name should be first letter capitalized
+                        $currentFormat = "F";
                         $format .= "F";
+                        dump(['currentFormat' => $currentFormat,'format' => $format,'pattern' => $pattAr, 'date' => $date , 'key' => $key, 'val' => $val, 'match'=> $trimmedmonthFullWCapReg, 'textualmonthpart fullwcapitalized']);
                         continue;
                     }
                     
                     if(preg_match($monthFullLowReg, $trimmedmonth, $monthFullLowRegMatching) && !empty($trimmedmonthFullLowReg = (string)trim($monthFullLowRegMatching[0])) && strlen($trimmedmonthFullLowReg) > 0){
-                       // dump(['pattern' => $pattAr, 'date' => $date , 'key' => $key, 'val' => $val, 'match'=> $trimmedmonthFullLowReg, 'textualmonthpart fulllower']);
                         //need to store information that the month name should be lower cased
+                        $currentFormat = "F";
                         $format .= "F";
+                        dump(['currentFormat' => $currentFormat,'format' => $format,'pattern' => $pattAr, 'date' => $date , 'key' => $key, 'val' => $val, 'match'=> $trimmedmonthFullLowReg, 'textualmonthpart fulllower']);
                         continue;
                     }
                     
                     if(preg_match($monthShortCapReg, $trimmedmonth, $monthShortCapRegMatching) && !empty($trimmedmonthShortCapReg = (string)trim($monthShortCapRegMatching[0])) && strlen($trimmedmonthShortCapReg) > 0){
-                       // dump(['pattern' => $pattAr, 'date' => $date , 'key' => $key, 'val' => $val, 'match'=> $trimmedmonthShortCapReg, 'textualmonthpart short cap ']);
                         //need to store information that the month name should be upper cased
+                        $currentFormat = "M";
                         $format .= "M";
+                        dump(['currentFormat' => $currentFormat,'format' => $format,'pattern' => $pattAr, 'date' => $date , 'key' => $key, 'val' => $val, 'match'=> $trimmedmonthShortCapReg, 'textualmonthpart short cap ']);
                         continue;
                     }
 
                     if(preg_match($monthShortWcapReg, $trimmedmonth, $monthShortWcapRegMatching) && !empty($trimmedmonthShortWcapReg = (string)trim($monthShortWcapRegMatching[0])) && strlen($trimmedmonthShortWcapReg) > 0){
-                        //dump(['pattern' => $pattAr, 'date' => $date , 'key' => $key, 'val' => $val, 'match'=> $trimmedmonthShortWcapReg, 'textualmonthpart short W cap ']);
                         //need to store information that the month name should be w upper cased
+                        $currentFormat = "M";
                         $format .= "M";
+                        dump(['currentFormat' => $currentFormat,'format' => $format,'pattern' => $pattAr, 'date' => $date , 'key' => $key, 'val' => $val, 'match'=> $trimmedmonthShortWcapReg, 'textualmonthpart short W cap ']);
                         continue;
                     }
                     
                     if(preg_match($monthShortLowReg, $trimmedmonth, $monthShortLowRegMatching) && !empty($trimmedmonthShortLowReg = (string)trim($monthShortLowRegMatching[0])) && strlen($trimmedmonthShortLowReg) > 0){
-                        //dump(['pattern' => $pattAr, 'date' => $date , 'key' => $key, 'val' => $val, 'match'=> $trimmedmonthShortLowReg, 'textualmonthpart short cap ']);
                         //need to store information that the month name should be lower cased
+                        $currentFormat = "M";
                         $format .= "M";
+                        dump(['currentFormat' => $currentFormat,'format' => $format,'pattern' => $pattAr, 'date' => $date , 'key' => $key, 'val' => $val, 'match'=> $trimmedmonthShortLowReg, 'textualmonthpart short cap ']);
                         continue;
                     }
                 }
                 //numeric month part
                 if(preg_match($regnumbermonth, $val, $regnumbermonthmatch) && !empty($trimmednubermonth = (int)trim($regnumbermonthmatch[0])) && $trimmednubermonth > 0  && $trimmednubermonth < 13 && strlen($val) > 0 && $key >= 2 && $key <= 3){
-                    //dump(['pattern' => $pattAr, 'date' => $date , 'key' => $key, 'val' => $val, 'match'=> $daymatch, 'numeric month part']);
-                    
-                    //$format .= strlen($val) == 2 ? 'm' : 'n';
-                   // echo $format;
+                    if(preg_match('/d|j/m', $format)){
+                        $currentFormat = strlen($val) == 2 ? 'm' : 'n';
+                        $format .= strlen($val) == 2 ? 'm' : 'n';
+                    }else{
+                        $currentFormat = strlen($val) == 2 ? 'd' : 'j';
+                        $format .= strlen($val) == 2 ? 'd' : 'j';
+                    }
+                    dump(['currentFormat' => $currentFormat,'format' => $format,'pattern' => $pattAr, 'date' => $date , 'key' => $key, 'val' => $val, 'match'=> $trimmednubermonth, 'numeric month part']);
                     continue;
                 }
                 
@@ -238,23 +248,24 @@ foreach($content as $date){
                 
                 //yearpart
                 if(preg_match($regnumberyear, $val, $yearmatch) && !empty($trimmedyear = (int)trim($yearmatch[0])) && $trimmedyear > 0  && strlen($val) >= 2 && $key > 3){
-                    //dump(['pattern' => $pattAr, 'date' => $date , 'key' => $key, 'val' => $val, 'match'=> $val, 'year part']);
+                    $currentFormat = strlen($val) == 4 ? 'Y' : 'y';
                     $format .= strlen($val) == 4 ? 'Y' : 'y';
-                    //echo $format;
+                    dump(['currentFormat' => $currentFormat,'format' => $format,'pattern' => $pattAr, 'date' => $date , 'key' => $key, 'val' => $val, 'match'=> $val, 'year part']);
                     continue;
                 }
                 
                 
                 //var_dump(preg_match($regsep, $val, $sepMatch));
                 if(preg_match($regsep, $val, $sepMatch) && !empty($sep = $sepMatch[0]) && strlen($sep)){
-                    //dump(['res'=> $res, 'pattern' => $pattAr, 'date' => $date , 'key' => $key, 'val' => $val, 'match'=> $sep, 'separatorpart']);
+                    $currentFormat = $sep;
                     $format .= $sep;
+                    dump(['currentFormat' => $currentFormat, 'format' => $format,'pattern' => $pattAr, 'date' => $date , 'key' => $key, 'val' => $val, 'match'=> $sep, 'separatorpart']);
                     continue;
                 }
             }catch (Exception $e){
                     //dump($e->getMessage());
             }
-            //echo $format;
+            echo $format;
         }
         
     }
