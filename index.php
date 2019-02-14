@@ -230,6 +230,11 @@ foreach($content as $date){
                         dump(['currentFormat' => $currentFormat,'format' => $format,'pattern' => $pattAr, 'date' => $date , 'key' => $key, 'val' => $val, 'match'=> $trimmedmonthShortLowReg, 'textualmonthpart short cap ']);
                         continue;
                     }
+                    
+                    //if month name contais other numeric characters
+                    if(preg_match('/\d/m', $trimmedmonth)){
+                        
+                    }
                 }
                 //numeric month part
                 if(preg_match($regnumbermonth, $val, $regnumbermonthmatch) && !empty($trimmednubermonth = (int)trim($regnumbermonthmatch[0])) && $trimmednubermonth > 0  && $trimmednubermonth < 13 && strlen($val) > 0 && $key >= 2 && $key <= 3){
