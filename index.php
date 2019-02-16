@@ -1,6 +1,10 @@
 <?php 
 
 $content = array(
+    "aug2006",
+    "05december2006",
+    "1.16",
+    "10/2006",
     "January 02 2019",
     "01/02/2019",
     "06 JANUARY, 2019",
@@ -110,7 +114,9 @@ $regsep = '/[\.|,|\s|\-|\/]{0,2}/m';
 $regnumberday = '/^[\d]{1,2}/m';
 $regnumbermonth = '/^[\d]{1,2}/m';
 $regnumberyear = '/^(\d{2}|\d{4})$/m';
-$regallmonth = '/JANUARY|January|january|JAN|Jan|jan|FEBRUARY|February|february|FEB|Feb|feb|MARCH|March|march|MAR|Mar|mar|APRIL|April|april|APR|Apr|apr|MAY|May|may|JUNE|June|june|JUN|Jun|jun|JULY|July|july|JUL|Jul|jul|AUGUST|August|august|AUG|Aug|aug|SEPTEMBER|September|september|SEP|Sep|sep|OCTOBER|October|october|OCT|Oct|oct|NOVEMBER|November|november|NOV|Nov|nov|DECEMBER|December|december|DEC|Dec/m';
+//$regallmonthsplit = '/JANUARY|January|january|JAN|Jan|jan|FEBRUARY|February|february|FEB|Feb|feb|MARCH|March|march|MAR|Mar|mar|APRIL|April|april|APR|Apr|apr|MAY|May|may|JUNE|June|june|JUN|Jun|jun|JULY|July|july|JUL|Jul|jul|AUGUST|August|august|AUG|Aug|aug|SEPTEMBER|September|september|SEP|Sep|sep|OCTOBER|October|october|OCT|Oct|oct|NOVEMBER|November|november|NOV|Nov|nov|DECEMBER|December|december|DEC|Dec/m';
+$noseparatorreg = '/^[\d]{1,2}([a-zA-Z]{1,9})[\d]{2,4}$|^([a-zA-Z]{1,9})[\d]{2,4}$/m';
+$regallmonth = '/^JANUARY$|^January$|^january$|^JAN$|^Jan$|^jan$|^FEBRUARY$|^February$|^february$|^FEB$|^Feb$|^feb$|^MARCH$|^March$|^march$|^MAR$|^Mar$|^mar$|^APRIL$|^April$|^april$|^APR$|^Apr$|^apr$|^MAY$|^May$|^may$|^JUNE$|^June$|^june$|^JUN$|^Jun$|^jun$|^JULY$|^July$|^july$|^JUL$|^Jul$|^jul$|^AUGUST$|^August$|^august$|^AUG$|^Aug$|^aug$|^SEPTEMBER$|^September$|^september$|^SEP$|^Sep$|^sep$|^OCTOBER$|^October$|^october$|^OCT$|^Oct$|^oct$|^NOVEMBER$|^November$|^november$|^NOV$|^Nov$|^nov$|^DECEMBER$|^December$|^december$|^DEC$|^Dec$/m';
 $monthFullCapReg = '/JANUARY|FEBRUARY|MARCH|APRIL|MAY|JUNE|JULY|AUGUST|SEPTEMBER|OCTOBER|NOVEMBER|DECEMBER/m';
 $monthFullWCapReg = '/January|February|March|April|May|June|July|August|September|October|November|December/m';
 $monthFullLowReg = '/january|february|march|april|may|june|july|august|september|october|november|december/m';
@@ -173,11 +179,43 @@ foreach($content as $date){
             //dump($key);
            // dump($val);
             try{
-                //day part
-                if(preg_match($regnumberday, $val, $daymatch) && !empty($trimmedDay = (int)trim($daymatch[0])) && $trimmedDay > 0  && $trimmedDay < 32 && strlen($val) <= 2 && $key < 2){
+                //no separator part
+                if(preg_match($noseparatorreg, $val)){
+                    $pat = str_split($val);
+                   // dump($pat);
+                    $day = "";
+                    $month = "";
+                    $year = "";
+                    foreach($pat as $v){
+                        //day
+                        if(preg_match('/\d/m',$v)){
+                            if(empty($month)){
+                                $day .= $v;
+                            }
+                        }
+                        
+                        if(preg_match('/[a-zA-Z]{1}/m',$v)){
+                            $month .= $v;
+                        }
+                        
+                        if(preg_match('/\d/m',$v)){
+                            if(isset($month) && !empty($month)){
+                                $year .= $v;
+                            }
+                        }
+                    }
+                    
+                    echo 'day: ' .$day .' month: '.$month. ' year: '.$year . '<br>';
+                    //echo $val;
+                    continue;
+                }
+                
+                 //day part
+                if(preg_match($regnumberday, $val, $daymatch) && !empty($trimmedDay = (int)trim($daymatch[0])) && $trimmedDay > 0  && $trimmedDay < 32 && strlen($val) <= 2 && $key < 2 && !empty($pattAr[5])){
                     $currentFormat = strlen($val) == 2 ? 'd' : 'j';
                     $format .= strlen($val) == 2 ? 'd' : 'j';
-                    dump(['currentFormat' => $currentFormat,'format' => $format,'pattern' => $pattAr, 'date' => $date , 'key' => $key, 'val' => $val, 'match'=> $daymatch, 'daypart']);
+                    //dump(['currentFormat' => $currentFormat,'format' => $format,'pattern' => $pattAr, 'date' => $date , 'key' => $key, 'val' => $val, 'match'=> $daymatch, 'daypart']);
+                    //dump(['currentFormat' => $currentFormat,'format' => $format,'date' => $date ,   ]);
                     continue;
                 }
                 // still I got to handle format like January 02 2018 and so on.
@@ -187,7 +225,8 @@ foreach($content as $date){
                         //need to store information that the month name should be capitalized
                         $currentFormat = "F";
                         $format .= "F";
-                        dump(['currentFormat' => $currentFormat,'format' => $format,'pattern' => $pattAr, 'date' => $date , 'key' => $key, 'val' => $val, 'match'=> $trimmedmonthFullCapReg, 'textualmonthpart fullcapitalized']);
+                        //dump(['currentFormat' => $currentFormat,'format' => $format,'pattern' => $pattAr, 'date' => $date , 'key' => $key, 'val' => $val, 'match'=> $trimmedmonthFullCapReg, 'textualmonthpart fullcapitalized']);
+                        //dump(['currentFormat' => $currentFormat,'format' => $format,'date' => $date ,   ]);
                         continue;
                     }
                     
@@ -195,7 +234,8 @@ foreach($content as $date){
                         //need to store information that the month name should be first letter capitalized
                         $currentFormat = "F";
                         $format .= "F";
-                        dump(['currentFormat' => $currentFormat,'format' => $format,'pattern' => $pattAr, 'date' => $date , 'key' => $key, 'val' => $val, 'match'=> $trimmedmonthFullWCapReg, 'textualmonthpart fullwcapitalized']);
+                        //dump(['currentFormat' => $currentFormat,'format' => $format,'pattern' => $pattAr, 'date' => $date , 'key' => $key, 'val' => $val, 'match'=> $trimmedmonthFullWCapReg, 'textualmonthpart fullwcapitalized']);
+                        //dump(['currentFormat' => $currentFormat,'format' => $format,'date' => $date ,   ]);
                         continue;
                     }
                     
@@ -203,15 +243,17 @@ foreach($content as $date){
                         //need to store information that the month name should be lower cased
                         $currentFormat = "F";
                         $format .= "F";
-                        dump(['currentFormat' => $currentFormat,'format' => $format,'pattern' => $pattAr, 'date' => $date , 'key' => $key, 'val' => $val, 'match'=> $trimmedmonthFullLowReg, 'textualmonthpart fulllower']);
+                        //dump(['currentFormat' => $currentFormat,'format' => $format,'pattern' => $pattAr, 'date' => $date , 'key' => $key, 'val' => $val, 'match'=> $trimmedmonthFullLowReg, 'textualmonthpart fulllower']);
+                       //dump(['currentFormat' => $currentFormat,'format' => $format,'date' => $date ,   ]);
                         continue;
                     }
                     
                     if(preg_match($monthShortCapReg, $trimmedmonth, $monthShortCapRegMatching) && !empty($trimmedmonthShortCapReg = (string)trim($monthShortCapRegMatching[0])) && strlen($trimmedmonthShortCapReg) > 0){
-                        //need to store information that the month name should be upper cased
+                        //need to store information that the month name should be upper cased 
                         $currentFormat = "M";
                         $format .= "M";
-                        dump(['currentFormat' => $currentFormat,'format' => $format,'pattern' => $pattAr, 'date' => $date , 'key' => $key, 'val' => $val, 'match'=> $trimmedmonthShortCapReg, 'textualmonthpart short cap ']);
+                        //dump(['currentFormat' => $currentFormat,'format' => $format,'pattern' => $pattAr, 'date' => $date , 'key' => $key, 'val' => $val, 'match'=> $trimmedmonthShortCapReg, 'textualmonthpart short cap ']);
+                        //dump(['currentFormat' => $currentFormat,'format' => $format,'date' => $date ,   ]);
                         continue;
                     }
 
@@ -219,7 +261,8 @@ foreach($content as $date){
                         //need to store information that the month name should be w upper cased
                         $currentFormat = "M";
                         $format .= "M";
-                        dump(['currentFormat' => $currentFormat,'format' => $format,'pattern' => $pattAr, 'date' => $date , 'key' => $key, 'val' => $val, 'match'=> $trimmedmonthShortWcapReg, 'textualmonthpart short W cap ']);
+                        //dump(['currentFormat' => $currentFormat,'format' => $format,'pattern' => $pattAr, 'date' => $date , 'key' => $key, 'val' => $val, 'match'=> $trimmedmonthShortWcapReg, 'textualmonthpart short W cap ']);
+                        //dump(['currentFormat' => $currentFormat,'format' => $format,'date' => $date ,   ]);
                         continue;
                     }
                     
@@ -227,7 +270,8 @@ foreach($content as $date){
                         //need to store information that the month name should be lower cased
                         $currentFormat = "M";
                         $format .= "M";
-                        dump(['currentFormat' => $currentFormat,'format' => $format,'pattern' => $pattAr, 'date' => $date , 'key' => $key, 'val' => $val, 'match'=> $trimmedmonthShortLowReg, 'textualmonthpart short cap ']);
+                        //dump(['currentFormat' => $currentFormat,'format' => $format,'pattern' => $pattAr, 'date' => $date , 'key' => $key, 'val' => $val, 'match'=> $trimmedmonthShortLowReg, 'textualmonthpart short cap ']);
+                        //dump(['currentFormat' => $currentFormat,'format' => $format,'date' => $date ,   ]);
                         continue;
                     }
                     
@@ -237,16 +281,31 @@ foreach($content as $date){
                     }
                 }
                 //numeric month part
-                if(preg_match($regnumbermonth, $val, $regnumbermonthmatch) && !empty($trimmednubermonth = (int)trim($regnumbermonthmatch[0])) && $trimmednubermonth > 0  && $trimmednubermonth < 13 && strlen($val) > 0 && $key >= 2 && $key <= 3){
+                if(preg_match($regnumbermonth, $val, $regnumbermonthmatch) && !empty($trimmednubermonth = (int)trim($regnumbermonthmatch[0])) && $trimmednubermonth > 0  && strlen($val) > 0 && $key >= 1 && $key <= 3){
                     if(preg_match('/d|j/m', $format)){
                         $currentFormat = strlen($val) == 2 ? 'm' : 'n';
                         $format .= strlen($val) == 2 ? 'm' : 'n';
+                        continue;
                     }else{
-                        $currentFormat = strlen($val) == 2 ? 'd' : 'j';
-                        $format .= strlen($val) == 2 ? 'd' : 'j';
+                        if(empty($pattAr[5])){
+                            if(!preg_match('/F|M|m|n/m', $format) && strlen($val) >=1 && strlen($val) <=2 ){
+                                $currentFormat = strlen($val) == 2 ? 'm' : 'n';
+                                $format .= strlen($val) == 2 ? 'm' : 'n';
+                                continue;
+                            }else{
+                                $currentFormat = strlen($val) == 4 ? 'Y' : 'y';
+                                $format .= strlen($val) == 4? 'Y' : 'y';
+                                continue;
+                            }
+                        }else{
+                            $currentFormat = strlen($val) == 2 ? 'd' : 'j';
+                            $format .= strlen($val) == 2 ? 'd' : 'j';
+                            continue;
+                        }
                     }
-                    dump(['currentFormat' => $currentFormat,'format' => $format,'pattern' => $pattAr, 'date' => $date , 'key' => $key, 'val' => $val, 'match'=> $trimmednubermonth, 'numeric month part']);
-                    continue;
+                    //dump(['currentFormat' => $currentFormat,'format' => $format,'pattern' => $pattAr, 'date' => $date , 'key' => $key, 'val' => $val, 'match'=> $trimmednubermonth, 'numeric month part']);
+                    //dump(['currentFormat' => $currentFormat,'format' => $format,'date' => $date ,   ]);
+                   
                 }
                 
         
@@ -255,7 +314,8 @@ foreach($content as $date){
                 if(preg_match($regnumberyear, $val, $yearmatch) && !empty($trimmedyear = (int)trim($yearmatch[0])) && $trimmedyear > 0  && strlen($val) >= 2 && $key > 3){
                     $currentFormat = strlen($val) == 4 ? 'Y' : 'y';
                     $format .= strlen($val) == 4 ? 'Y' : 'y';
-                    dump(['currentFormat' => $currentFormat,'format' => $format,'pattern' => $pattAr, 'date' => $date , 'key' => $key, 'val' => $val, 'match'=> $val, 'year part']);
+                    //dump(['currentFormat' => $currentFormat,'format' => $format,'pattern' => $pattAr, 'date' => $date , 'key' => $key, 'val' => $val, 'match'=> $val, 'year part']);
+                    //dump(['currentFormat' => $currentFormat,'format' => $format,'date' => $date ,   ]);
                     continue;
                 }
                 
@@ -264,17 +324,18 @@ foreach($content as $date){
                 if(preg_match($regsep, $val, $sepMatch) && !empty($sep = $sepMatch[0]) && strlen($sep)){
                     $currentFormat = $sep;
                     $format .= $sep;
-                    dump(['currentFormat' => $currentFormat, 'format' => $format,'pattern' => $pattAr, 'date' => $date , 'key' => $key, 'val' => $val, 'match'=> $sep, 'separatorpart']);
+                    //dump(['currentFormat' => $currentFormat, 'format' => $format,'pattern' => $pattAr, 'date' => $date , 'key' => $key, 'val' => $val, 'match'=> $sep, 'separatorpart']);
+                    //dump(['currentFormat' => $currentFormat,'format' => $format,'date' => $date ,   ]);
                     continue;
                 }
             }catch (Exception $e){
                     //dump($e->getMessage());
             }
-            echo $format;
         }
+       // dump(['pattern' => $pattAr,'format' => $format,'date' => $date    ]);
+        
         
     }
   
 }
 ?>
-
