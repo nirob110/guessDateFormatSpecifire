@@ -206,6 +206,8 @@ foreach($content as $date){
                     }
                     
                     echo 'day: ' .$day .' month: '.$month. ' year: '.$year . '<br>';
+                    
+                    
                     //echo $val;
                     continue;
                 }
@@ -275,10 +277,7 @@ foreach($content as $date){
                         continue;
                     }
                     
-                    //if month name contais other numeric characters
-                    if(preg_match('/\d/m', $trimmedmonth)){
-                        
-                    }
+                    
                 }
                 //numeric month part
                 if(preg_match($regnumbermonth, $val, $regnumbermonthmatch) && !empty($trimmednubermonth = (int)trim($regnumbermonthmatch[0])) && $trimmednubermonth > 0  && strlen($val) > 0 && $key >= 1 && $key <= 3){
