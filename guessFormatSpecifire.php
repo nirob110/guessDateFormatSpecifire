@@ -25,43 +25,67 @@ class guessFormatSpecifire {
     
     
     public function parse(String $dateString){
+        $this->formatArray['format'] = "";
         if($this->checkString($dateString)){
             $this->primaryDateString = $dateString;
             $this->patternArray = preg_split($this->regexpWordBoundary, $this->primaryDateString);
+            $this->checkTypeofDateString();
         }
         
-        return $this->formatSpecifire();
+        $this->dump([$this->formatArray, $this->patternArray]);
+        return $this->formatArray;
+        
     }
     
-    public function formatSpecifire(){
+    public function checkTypeofDateString(){
+        //check textual date string with separator
+        if($this->checkPatternForSeparator($this->primaryDateString, $this->regsep)){
+            $this->dump($this->primaryDateString);
+            //check textual date string with separator
+            if($this->checkPatternMatchingResult($this->primaryDateString, $this->regallmonthsplit)){
+                $this->handleTextualDateWithSeparator();
+            }else{
+                //check numeric datestring with separator
+            }
+        }
+        
+        
+        
+        
+        //check noseparator datestring
+    }
+    
+    public function handleTextualDateWithSeparator(){
         if($this->checkArray($this->patternArray)){
             foreach($this->patternArray as $key => $val){
-                $this->checkEmptyPart($key, $val);
-                //handle date with textual month names
-                if($this->checkPatternMatchingResult($val, $this->regallmonthsplit)){
-                    $this->checkDayPart($key, $val);
-                    $this->checkTextualMonthPart($key, $val);
-                    
-                }else{
-                    //handle date with numeric month names
-                    
-                }
+                if($this->checkEmptyPart($key, $val)){continue;};
+                if($this->checkSeparatorPart($key, $val)){continue;}
+                if($this->checkDayPartForTextualMonth($key, $val)){continue;};
+                if($this->checkTextualMonthPart($key, $val)){continue;};
+                if($this->checkYearPartForTextualMonth($key, $val)){continue;};
             }
-           
         }
     }
     
     public function checkEmptyPart($key, $val){
         if(empty($val)){
-            $this->formatArray['format'] .= " ";
+            $this->formatArray['format'] .= "";
+            return true;
         }
+        return false;
     }
-    
-    public function checkDayPart($key, $val){
+    //need to work on that later
+    public function checkDayPartForTextualMonth($key, $val){
         $daymatch = array();
-        if(preg_match($this->regnumberday, $val, $daymatch) && !empty($trimmedDay = (int)trim($daymatch[0])) && $trimmedDay > 0  && $trimmedDay < 32 && strlen($val) <= 2 && !empty($this->patternArray[5])){
-            $this->formatArray['format'] .= strlen($val) == 2 ? 'd' : 'j';
+        if(preg_match($this->regnumberday, $val, $daymatch) && !empty($trimmedDay = (int)trim($daymatch[0])) && $trimmedDay > 0  && $trimmedDay < 32 && strlen($val) <= 2 && !empty($this->patternArray[5]) && $key <= 3){
+            if(strlen($val) == 2){
+                $this->updateFormat("d");
+            }else{
+                $this->updateFormat("j");
+            }
+            return true;
         }
+        return false;
     }
     
     
@@ -71,23 +95,121 @@ class guessFormatSpecifire {
             if($this->checkArray($monthmatch)){
                 $trimmedmonth = (string)trim($monthmatch[0]);
                 if(!empty($trimmedmonth) && strlen($trimmedmonth) > 0){
-                    $this->checkFullCapitalMonthPart($key, $val, $trimmedmonth, $this->monthFullCapReg);
+                    if($this->checkCapitalFullMonthPart($trimmedmonth, $this->monthFullCapReg)){  return true; } 
+                    if($this->checkWordCapitalFullMonthPart($trimmedmonth, $this->monthFullWCapReg)) {return true; } 
+                    if($this->checkLowerFullMonthPart($trimmedmonth, $this->monthFullLowReg)) {return true; } 
+                    if($this->checkCapitalShortMonthPart($trimmedmonth, $this->monthShortCapReg)) {return true; } 
+                    if($this->checkWordCapitalShortMonthPart($trimmedmonth, $this->monthShortWcapReg)){return true; }
+                    if($this->checkLowerShortMonthPart($trimmedmonth, $this->monthShortLowReg)) {return true; } 
                 }
             }
         }
     }
     
-    public function checkFullCapitalMonthPart($key, $val, $trimmedmonth, $pattern){
+    public function checkSeparatorPart($key, $val){
+        if($this->checkPatternForSeparator($val, $this->regsep)){
+            $this->updateFormat($val);
+            return true;
+        }
+        return false;
+    }
+    
+    public function checkYearPartForTextualMonth($key, $val){
+        $this->dump($val);
+        if($this->checkPatternMatchingResult($val, $this->regnumberyear) && strlen($val) >= 2 && strlen($val) <= 4 && strlen($val) != 3 && $key >= 3 ){
+            if(strlen($val) == 4){
+                $this->updateFormat("Y");
+            }else{
+                $this->updateFormat("y");
+            }
+            return true;
+        }
+        return false;
+    }
+    
+    
+    
+    public function checkCapitalFullMonthPart($trimmedmonth, $pattern){
         if($this->checkPatternMatchingResult($trimmedmonth, $pattern)){
-            
+            $this->updateFormat('F', true, 'uppercase');
+            return true;
+        }
+        return false;
+    }
+    
+    public function checkWordCapitalFullMonthPart($trimmedmonth, $pattern){
+        if($this->checkPatternMatchingResult($trimmedmonth, $pattern)){
+            $this->updateFormat('F', true, 'worduppercase');
+            return true;
+        }
+        return false;
+    }
+    
+    public function checkLowerFullMonthPart($trimmedmonth, $pattern){
+        if($this->checkPatternMatchingResult($trimmedmonth, $pattern)){
+            $this->updateFormat('F', true, 'lowercase');
+            return true;
+        }
+        return false;
+    }
+
+    public function checkCapitalShortMonthPart($trimmedmonth, $pattern){
+        if($this->checkPatternMatchingResult($trimmedmonth, $pattern)){
+            $this->updateFormat('M', true, 'uppercase');
+            return true;
+        }
+        return false;
+    }
+
+    public function checkWordCapitalShortMonthPart($trimmedmonth, $pattern){
+        if($this->checkPatternMatchingResult($trimmedmonth, $pattern)){
+            $this->updateFormat('M', true, 'worduppercase');
+            return true;
+        }
+        return false;
+    }
+    
+    public function checkLowerShortMonthPart($trimmedmonth, $pattern){
+        if($this->checkPatternMatchingResult($trimmedmonth, $pattern)){
+            $this->updateFormat('M', true, 'lowercase');
+            return true;
+        }
+        return false;
+    }
+    
+    
+    
+    //HELPERS
+    public function checkCharacterInformat($char){
+        if($this->checkString($char) && $this->checkString($this->formatArray['format']) && strpos($this->formatArray['format'], $char)){
+            return true;
+        }
+        return false;
+    }
+    
+    public function updateFormat($format, $isMonth = false, $caseDirection = ""){
+        if($isMonth){
+            $this->formatArray['format'] .= $format;
+            $this->formatArray['caseDirectionBool'] = 1;
+            $this->formatArray['caseDirection'] = $caseDirection;
+        }else{
+            $this->formatArray['format'] .= $format;
         }
     }
     
-    //helpers
-    //HELPERS
-    public function checkPatternMatchingResult($month, $pattern){
+    public function checkPatternMatchingResult($subject, $pattern){
         $patternMatching = array();
-        if(preg_match($pattern, $month, $patternMatching) && !empty($trimmePatternMatching = (string)trim($patternMatching[0])) && strlen($trimmePatternMatching) > 0){
+        if(preg_match($pattern, $subject, $patternMatching) && isset($patternMatching[0]) && !empty($trimmePatternMatching = (string)trim($patternMatching[0])) && strlen($trimmePatternMatching) > 0){
+            return true;
+        }
+        return false;
+    }
+    
+    public function checkPatternForSeparator($subject, $pattern){
+        $patternMatching = array();
+        $data = preg_match($pattern, $subject, $patternMatching);
+        $this->dump($patternMatching);
+        if(preg_match($pattern, $subject, $patternMatching) &&  !empty($trimmePatternMatching = $patternMatching[0]) && strlen($trimmePatternMatching) > 0){
             return true;
         }
         return false;
@@ -134,4 +256,6 @@ class guessFormatSpecifire {
 
 
 $ob = new guessFormatSpecifire();
-$ob->parse("01 January 2018");
+$ob->parse("January.05.01");
+$ob->parse("January.05");
+$ob->parse("January05");
